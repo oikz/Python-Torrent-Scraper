@@ -1,8 +1,8 @@
 torrentList = {
-    "Torrent1": 40,
-    "Torrent2": 2,
-    "Torrent3": 1,
-    "Torrent4": 3,
+    "Torrent1": "40/10",
+    "Torrent2": "2/15",
+    "Torrent3": "1/20",
+    "Torrent4": "3/50",
 }
 
 #for key in sorted(torrentList.keys()):
