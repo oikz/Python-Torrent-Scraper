@@ -7,14 +7,24 @@ def searched():
     print(thepiratebay.get())
     print("1337x")
     print(x1337.get())
-    print("rarbgx")
+    print("rarbg")
     print(rarbg.get())
     print("limetorrents")
     print(limetorrents.get())
     print("katcr")
     print(katcr.get())
-    print("torrentdownlaods")
+    print("torrentdownloads")
     print(torrentdownloads.get())
+
+    try:
+        if len(searchbox.get()) <= 3:
+            print("Too short")
+        else:
+            print("Nice")
+
+    except:
+        print("Please enter a search term")
+    title=Label(frame1, text=katcr.get())
 
 def cleartext():
     searchbox.delete(0, END)
