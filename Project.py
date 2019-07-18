@@ -14,7 +14,9 @@ def searched():
     global searchedframe1
     global searchedframe2
     global searchedframe3
-    global searchedframe4    
+    global searchedframe4   
+    global tooshort 
+    global title
     menuframe1.pack_forget()
     menuframe2.pack_forget()
     menuframe3.pack_forget()
@@ -26,7 +28,7 @@ def searched():
     searchedframe3.pack()
     searchedframe4=Frame(window)
     searchedframe4.pack()
-    if searchbox.get()=="Must be longer than 3 characters":
+    if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
         searchbutton()
     else:
         print("")
@@ -67,6 +69,8 @@ def searched():
 
     tryagainbutton=Button(searchedframe4, text="New Search", command=restart)
     tryagainbutton.pack(side=RIGHT)
+
+    #original output testing for checkboxes    
     #print("thepiratebay")
     #print(thepiratebay.get())
     #print("1337x")
@@ -81,14 +85,19 @@ def searched():
     #print(torrentdownloads.get())
 
     try:
-        if len(searchbox.get()) <= 3:
+        if len(searchbox.get()) <= 3 or searchbox.get()=="Must be longer than 3 characters":
             #Sends the user back to the search page if their search term is smaller than 3 characters
             searchedframe1.pack_forget()
             searchedframe2.pack_forget()
+            menuframe1.destroy()
+            menuframe2.destroy()
+            menuframe3.destroy()
             tooshort=True
             searchbutton()
+            #clears everything and sets the variable "tooshort" to true for future use
         else:
             print("Nice")
+            tootshort=False
 
     except:
         print("Please enter a search term")
@@ -112,6 +121,7 @@ def searchboxfocused(event):
 def searchbutton():
     global tooshort
     global window
+    global title
     global searchbox
     global menuframe1
     global menuframe2
@@ -131,8 +141,10 @@ def searchbutton():
     # A basic label with a title "Welcome to this program" using Arial Bold Font size 25
     # Packs the Label into the menuframe and aligns it TOP with padding above of 25px and padding below of 30
     if tooshort:
-        title2=Label(menuframe1, text="Your search must be longer than 3 characters", front=("Arial Bold", 20))
+        #title.destroy()
+        title2=Label(menuframe1, text="Your search must be longer than 3 characters", font=("Arial Bold", 20))
         title2.pack(side=TOP)
+        tooshort=False
     else:
         print("")
     searchbox = Entry(menuframe1, text="Enter Search Term", width="35")
