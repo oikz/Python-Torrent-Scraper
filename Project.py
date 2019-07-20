@@ -8,13 +8,11 @@ def restart():
     searchedframe1.pack_forget()
     searchedframe2.pack_forget()
     searchedframe3.pack_forget()
-    searchedframe4.pack_forget()
     searchbutton()
 def searched():
     global searchedframe1
     global searchedframe2
-    global searchedframe3
-    global searchedframe4   
+    global searchedframe3 
     global tooshort 
     global title
     menuframe1.pack_forget()
@@ -26,8 +24,6 @@ def searched():
     searchedframe2.pack()
     searchedframe3=Frame(window)
     searchedframe3.pack()
-    searchedframe4=Frame(window)
-    searchedframe4.pack()
     if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
         searchbutton()
     else:
@@ -67,7 +63,7 @@ def searched():
         torrentdownloadslabel.pack(side=LEFT)
     title.pack()
 
-    tryagainbutton=Button(searchedframe4, text="New Search", command=restart)
+    tryagainbutton=Button(searchedframe3, text="New Search", command=restart)
     tryagainbutton.pack(side=RIGHT)
 
     #original output testing for checkboxes    
@@ -89,6 +85,7 @@ def searched():
             #Sends the user back to the search page if their search term is smaller than 3 characters
             searchedframe1.pack_forget()
             searchedframe2.pack_forget()
+            searchedframe3.pack_forget()
             menuframe1.destroy()
             menuframe2.destroy()
             menuframe3.destroy()
