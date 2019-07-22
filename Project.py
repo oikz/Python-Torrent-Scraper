@@ -1,5 +1,14 @@
 from tkinter import *
 
+def scraper():
+    if thepiratebay.get():
+        global searchterm
+        piratebayurl="https://thepiratebay.org/search/search%20term/"
+        replacewith=searchbox.get()
+        piratebayurl.replace('search%20term', replacewith)
+        print(piratebayurl.replace('search%20term', replacewith))
+
+
 def restart():
 
     menuframe1.pack_forget()
@@ -66,6 +75,7 @@ def searched():
     tryagainbutton=Button(searchedframe3, text="New Search", command=restart)
     tryagainbutton.pack(side=RIGHT)
 
+    scraper()
     #original output testing for checkboxes    
     #print("thepiratebay")
     #print(thepiratebay.get())
