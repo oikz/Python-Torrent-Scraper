@@ -1,4 +1,6 @@
 from tkinter import *
+from bs4 import BeautifulSoup
+import requests
 
 def scraper():
     if thepiratebay.get():
@@ -6,7 +8,20 @@ def scraper():
         piratebayurl="https://thepiratebay.org/search/search%20term/"
         replacewith=searchbox.get()
         piratebayurl.replace('search%20term', replacewith)
-        print(piratebayurl.replace('search%20term', replacewith))
+        #print(piratebayurl.replace('search%20term', replacewith))
+        response = requests.get(piratebayurl.replace('search%20term', replacewith))
+        html = response.text
+        soup = BeautifulSoup(html, "lxml")
+        soup.prettify()
+        titles=soup.find_all(class_="detLink")
+        seeders=soup.find_all(align_="right")
+        titlelist=[]
+        i=0
+        while (i <=4):
+            #print(titles[i]
+            titlelist.append(titles[i])
+            i=i+1
+        print(titlelist) 
 
 
 def restart():
@@ -38,7 +53,7 @@ def searched():
     else:
         print("")
     if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or limetorrents.get() == 1 or katcr.get() == 1 or torrentdownloads.get() == 1:
-        print("continuing")
+        print("")
     else:
         title=Label(searchedframe1, text="Please select at least one website")
     title=Label(searchedframe1, text="Results for: " + searchbox.get(), font=("Arial Bold", 25))
@@ -103,7 +118,6 @@ def searched():
             searchbutton()
             #clears everything and sets the variable "tooshort" to true for future use
         else:
-            print("Nice")
             tootshort=False
 
     except:

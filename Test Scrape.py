@@ -1,13 +1,24 @@
 from bs4 import BeautifulSoup
 import requests
-url = 'https://rarbg.to/torrents.php?category=27;28&search=dying+light&order=seeders&by=DESC'
+url = 'https://thepiratebay.org/search/Devil%20may%20cry/'
 response = requests.get(url)
 
 html = response.text
 
 soup = BeautifulSoup(html, "lxml")
 
-print(soup.prettify())
+titles=soup.find_all(class_="detLink")
+seeders=soup.find_all(align_="right")
+titlelist=[]
+i=0
+while (i <=4):
+    #print(titles[i])
+    titlelist.append(titles[i])
+    i=i+1
+print(titlelist)    
+#titles=titles.split(",")
+#print(titles)
+#print(titles.prettify())
 
 
 
