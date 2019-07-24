@@ -6,34 +6,63 @@ def scraper():
     if thepiratebay.get():
         global searchterm
         piratebayurl="https://thepiratebay.org/search/search%20term/"
+        #base url for the program to modify
         replacewith=searchbox.get()
         piratebayurl.replace('search%20term', replacewith)
-        #print(piratebayurl.replace('search%20term', replacewith))
+        #replaces the search%20term in the url with the users chosen search term
         response = requests.get(piratebayurl.replace('search%20term', replacewith))
+        #requests the html of the page
         html = response.text
+        #saves the html as a big string
         soup = BeautifulSoup(html, "lxml")
+        #does some magic
         soup.prettify()
-        titles=soup.find_all(class_="detLink")
-        seeders=soup.find_all(align_="right")
-        titlelist=[]
+        #prettifies it?
+        try:
+            titles=soup.find_all(class_="detLink")
+            #creates an object containing all of the tags in the webpage that contain the class "detLink"
+            #all these tags include a title of the torrent, a link to the download page and comments etc that can be added later
+            seeders=soup.find_all('td', {'align': 'right'})
+            #finds all tags that have the align right attribute which is all of the seeders and leechers information
+            del seeders[1::2]
+            #deletes the leechers of each file as it wont be in the program
+            #may be added at a later date
+        except:
+            print("Website broke or smth")
+            scraper()
+        #placed in try accept as the website can go down and may break this part of the program
+        top5titles=[]
+        #creates a list to be used to save the top 5 files - titles
+        top5seeders=[]
+        #creates a list to be used to save the top 5 files seeders
         i=0
+        #sets a base i value of 0 to be used next
         while (i <=4):
-            #print(titles[i]
-            titlelist.append(titles[i])
+            #repeats 5 times
+            top5titles.append(titles[i])
+            #adds the top 5 torrents into the list
+            top5seeders.append(seeders[i])
+            #adds the top 5 torrents seeders into the list
             i=i+1
-        print(titlelist) 
+            #increases i value by one each time
+        print(top5titles)
+        print(top5seeders) 
+        #print for testing purposes
 
 
 def restart():
-
     menuframe1.pack_forget()
     menuframe2.pack_forget()
     menuframe3.pack_forget()
     searchedframe1.pack_forget()
     searchedframe2.pack_forget()
     searchedframe3.pack_forget()
+    tooshort=False
+    #chosensite=False
     searchbutton()
+
 def searched():
+    global chosensite
     global searchedframe1
     global searchedframe2
     global searchedframe3 
@@ -48,14 +77,16 @@ def searched():
     searchedframe2.pack()
     searchedframe3=Frame(window)
     searchedframe3.pack()
-    if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
-        searchbutton()
-    else:
-        print("")
+#    if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
+#        searchbutton()
+#        tooshort=False
+#    else:
+#        print("")
     if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or limetorrents.get() == 1 or katcr.get() == 1 or torrentdownloads.get() == 1:
         print("")
+        chosensite=True
     else:
-        title=Label(searchedframe1, text="Please select at least one website")
+        chosensite=False
     title=Label(searchedframe1, text="Results for: " + searchbox.get(), font=("Arial Bold", 25))
     if thepiratebay.get():
         piratebaylabel=Label(searchedframe2, text="ThePirateBay.org")
@@ -90,7 +121,6 @@ def searched():
     tryagainbutton=Button(searchedframe3, text="New Search", command=restart)
     tryagainbutton.pack(side=RIGHT)
 
-    scraper()
     #original output testing for checkboxes    
     #print("thepiratebay")
     #print(thepiratebay.get())
@@ -111,17 +141,42 @@ def searched():
             searchedframe1.pack_forget()
             searchedframe2.pack_forget()
             searchedframe3.pack_forget()
-            menuframe1.destroy()
-            menuframe2.destroy()
-            menuframe3.destroy()
+            menuframe1.pack_forget()
+            menuframe2.pack_forget()
+            menuframe3.pack_forget()
+            #menuframe1.destroy()
+            #menuframe2.destroy()
+            #menuframe3.destroy()
             tooshort=True
             searchbutton()
             #clears everything and sets the variable "tooshort" to true for future use
         else:
-            tootshort=False
+            tooshort=False
 
     except:
-        print("Please enter a search term")
+        print("")
+
+    try:
+        if chosensite==False:
+            #Sends the user back to the search page if they have not chosen any websites to search
+            searchedframe1.pack_forget()
+            searchedframe2.pack_forget()
+            searchedframe3.pack_forget()
+            menuframe1.pack_forget()
+            menuframe2.pack_forget()
+            menuframe3.pack_forget()
+            #menuframe1.destroy()
+            #menuframe2.destroy()
+            #menuframe3.destroy()
+            searchbutton()
+            #clears everything
+        else:
+            print("")
+
+    except:
+        print("")
+
+    scraper()
 
 def cleartext():
     searchbox.delete(0, END)
@@ -131,15 +186,11 @@ def cleartext():
     menuframe2.pack_forget()
     menuframe3.pack_forget()
     searchbutton()
-
-def searchboxfocused(event):
-#Function is called when the searchbox is clicked on
-    if searchbox.get() == 'Must be longer than 3 characters':
-       searchbox.delete(0, "end") # delete all the text in the entry
-       searchbox.insert(0, '') #Insert blank for user input
-       searchbox.config(fg = 'black')
+    tooshort=False
+    chosensite=False
 
 def searchbutton():
+    global chosensite
     global tooshort
     global window
     global title
@@ -157,27 +208,28 @@ def searchbutton():
     menuframe3.pack()
     window.title("Torrent Scraper")
     #Gives the window a title
-    title = Label(menuframe1, text="Welcome to this Program", font=("Arial Bold", 25))
+    title = Label(menuframe1, text="Welcome to my Legal Only Torrent searcher", font=("Arial Bold", 25))
     title.pack(pady=(25,30), side=TOP)
     # A basic label with a title "Welcome to this program" using Arial Bold Font size 25
     # Packs the Label into the menuframe and aligns it TOP with padding above of 25px and padding below of 30
-    if tooshort:
-        #title.destroy()
+    if tooshort==True:
         title2=Label(menuframe1, text="Your search must be longer than 3 characters", font=("Arial Bold", 20))
         title2.pack(side=TOP)
         tooshort=False
+    else: 
+        print("")
+    if chosensite==False:
+        title3=Label(menuframe1, text="You have not chosen any websites to search", font=("Arial Bold", 20))
+        title3.pack(side=TOP)
+        chosensite=True
+
     else:
         print("")
     searchbox = Entry(menuframe1, text="Enter Search Term", width="35")
     searchbox.pack(side=TOP, pady=10)
     # A basic searchbox for the user to enter their search term to be used by the program to search sites
     # Packs the searchbox into the menuframe, aligned TOP and with a padding of 10px above and below
-    searchbox.delete(0, END)
-    searchbox.insert(0, 'Must be longer than 3 characters')
-    searchbox.config(fg = 'grey')
     #Adds a background text to the box to tell the user that the search must be longer than 3 characters
-    searchbox.bind('<FocusIn>', searchboxfocused)
-    #Enables the searchbox to show "must be longer than 3 characters" until the user clicks it, then it disappears
     search = Button(menuframe1, text="Search", command=searched)
     search.pack(side=RIGHT)
     # Adds a search button for the user to execute the search with their chosen options and executes the searched() function
@@ -222,8 +274,9 @@ global menuframe1
 global menuframe2
 global menuframe3
 global tooshort
+global chosensite
 
-
+chosensite=True
 tooshort=False
 window=""
 window=Tk()
