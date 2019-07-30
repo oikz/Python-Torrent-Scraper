@@ -3,13 +3,16 @@ from bs4 import BeautifulSoup
 import requests
 
 def scraper():
+    top5titles=[]
+    top5urls=[]
+    top5seeders=[]
     if thepiratebay.get():
         global searchterm
         piratebayurl="https://thepiratebay.org/search/search%20term/"
         #base url for the program to modify
         replacewith=searchbox.get()
         piratebayurl.replace('search%20term', replacewith)
-        #replaces the search%20term in the url with the users chosen search term
+        #replaces the search%20term in the url with the users chosen search term 
         response = requests.get(piratebayurl.replace('search%20term', replacewith))
         #requests the html of the page
         html = response.text
@@ -31,47 +34,77 @@ def scraper():
         except:
             scraper()
         #placed in try accept as the website can go down and may break this part of the program
-        top5titles=[]
-        #creates a list to be used to save the top 5 files - titles
-        top5urls=[]
-        #creates a list to be used to save the top 5 files URLS
-        top5seeders=[]
-        #creates a list to be used to save the top 5 files seeders
         i=0
         #sets a base i value of 0 to be used next
         while (i <=4):
             #repeats 5 times
-            currenttitle=titles[i]
-            #saves the currently being used title as currenttitle for easier modification
-            currenttitle=currenttitle.text
-            #uses the built in Beautiful Soup function that only saves the text portion of the tag - the title of the file
-            currenturl=str(titles[i])
-            #saves the currently being used tag to be modified to get the url as a string
-            currenturl=currenturl.replace('<a class="detLink" href="','')
-            #removes the first part of the string before the link
-            currenturl=currenturl.split('" title', 1)[0]
-            #removes everything after the link
-            currenturl="https://thepiratebay.org"+currenturl
-            #adds the base url to the extension (urls on the website are saved as /torrent/variousnumbers/title)
-            currentseeders=seeders[i]
-            #saves current seeder value as a different variable for easier manipulation
-            currentseeders=currentseeders.text
-            #uses built in Beautiful Soup function to only save the text from the tag
-            #print(currenttitle)
-            #print(currenturl)
-            #print(currentseeders)
-            top5titles.append(currenttitle)
-            #adds the top 5 torrents into the list
-            top5urls.append(currenturl)
-            #adds the top 5 torrents urls to the list
-            top5seeders.append(currentseeders)
-            #adds the top 5 torrents seeders into the list
-            i=i+1
-            #increases i value by one each time
+            if titles!=[]:
+                currenttitle=titles[i]
+                #saves the currently being used title as currenttitle for easier modification
+                currenttitle=currenttitle.text
+                #uses the built in Beautiful Soup function that only saves the text portion of the tag - the title of the file
+                currenturl=str(titles[i])
+                #saves the currently being used tag to be modified to get the url as a string
+                currenturl=currenturl.replace('<a class="detLink" href="','')
+                #removes the first part of the string before the link
+                currenturl=currenturl.split('" title', 1)[0]
+                #removes everything after the link
+                currenturl="https://thepiratebay.org"+currenturl
+                #adds the base url to the extension (urls on the website are saved as /torrent/variousnumbers/title)
+                currentseeders=seeders[i]
+                #saves current seeder value as a different variable for easier manipulation
+                currentseeders=currentseeders.text
+                #uses built in Beautiful Soup function to only save the text from the tag
+                #print(currenttitle)
+                #print(currenturl)
+                #print(currentseeders)
+                top5titles.append(currenttitle)
+                #adds the top 5 torrents into the list
+                top5urls.append(currenturl)
+                #adds the top 5 torrents urls to the list
+                top5seeders.append(currentseeders)
+                #adds the top 5 torrents seeders into the list
+                i=i+1
+                #increases i value by one each time
+            else:
+                print("No Results from Piratebay")
+                break
         print(top5titles)
         print(top5urls)
         print(top5seeders) 
         #print for testing purposes
+    else:
+        print("")
+    if x1337.get():
+        print("Nice")
+        global searchterm
+        x1337url="https://1337x.to/search/search+term/1/"
+        #base url for the program to modify
+        replacewith=searchbox.get()
+        headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko)' 'Chrome/41.0.2227.1 Safari/537.36'}
+        #sets a "headers" because 1337x "declines" the request for the html because it thinks thats not a browser
+        x1337url=x1337url.replace('search+term', replacewith)
+        #replaces the search+term in the url with the users chosen search term 
+        response = requests.get(x1337url.replace('search+term', replacewith), headers=headers)
+        #print(x1337url)
+        #requests the html of the page
+        html = response.text
+        #saves the html as a big string
+        soup = BeautifulSoup(html, "lxml")
+        #does some magic
+        soup.prettify()
+        #prettifies it?
+        print(soup)
+        #rows=soup.find_all('tr')
+        #creates an object containing all of the tr rows as each of these includes all the information for one torrent
+        #Print for testing purposes
+        titles=soup.find_all(class_="coll-1 name")
+        print(titles)
+        i=0
+        #while (i <=4):
+
+    else:
+        print("")
 
 
 def restart():
