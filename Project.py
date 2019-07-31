@@ -3,11 +3,12 @@ from bs4 import BeautifulSoup
 import requests
 
 
-def scraper():
+class scraper:
     top5titles = []
     top5urls = []
     top5seeders = []
-    if thepiratebay.get():
+
+    def piratebayscraper():
         global searchterm
         piratebayurl = "https://thepiratebay.org/search/search%20term/"
         # base url for the program to modify
@@ -61,24 +62,23 @@ def scraper():
                 # print(currenttitle)
                 # print(currenturl)
                 # print(currentseeders)
-                top5titles.append(currenttitle)
+                scraper.top5titles.append(currenttitle)
                 # adds the top 5 torrents into the list
-                top5urls.append(currenturl)
+                scraper.top5urls.append(currenturl)
                 # adds the top 5 torrents urls to the list
-                top5seeders.append(currentseeders)
+                scraper.top5seeders.append(currentseeders)
                 # adds the top 5 torrents seeders into the list
                 i = i+1
                 # increases i value by one each time
             else:
                 print("No Results from Piratebay")
                 break
-        print(top5titles)
-        print(top5urls)
-        print(top5seeders)
+        print(scraper.top5titles)
+        print(scraper.top5urls)
+        print(scraper.top5seeders)
         # print for testing purposes
-    else:
-        print("")
-    if x1337.get():
+
+    def x1337scraper():
         print("Nice")
         global searchterm
         x1337url = "https://1337x.to/search/search+term/1/"
@@ -99,17 +99,51 @@ def scraper():
         # does some magic
         soup.prettify()
         # prettifies it?
-        print(soup)
         # rows=soup.find_all('tr')
         # creates an object containing all of the tr rows as each of these includes all the information for one torrent
         # Print for testing purposes
         titles = soup.find_all(class_="coll-1 name")
-        print(titles)
-        i = 0
-        # while (i <=4):
-
-    else:
-        print("")
+        comments = soup.find_all(class_="comments")
+        seeders = soup.find_all(class_="coll-2 seeds")
+        # grabs all of the elements with the clas of coll-1 name
+        # print(titles)
+        i = 1
+        # set at 1 instead of 0 as the first element with coll-1 name is not relevant for this program
+        while (i <= 5):
+            if titles != []:
+                currenttitle = titles[i]
+                # gets a title based on the value of i
+                currenttitle = currenttitle.text
+                currentcomment = comments[i-1]
+                #grabs comments at i-1 as i is based on the coll-1 name classes which ignore the first one
+                currentcomment=str(currentcomment)
+                #converts to string
+                currentcomment=currentcomment.replace('<span class="comments"><i class="flaticon-message"></i>','')
+                #removes everything before the number of comments
+                currentcomment=currentcomment.split('</span>', 1)[0]
+                currenttitle = currenttitle.replace(currentcomment, '')
+                # replaces the number at the end of the title (the number of comments) with a blank space
+                currenturl = titles[i]
+                #print(currenturl)
+                currenturl=str(currenturl)
+                #converts currenturl to a string
+                currenturl = currenturl.replace('<td class="coll-1 name"><a class="icon" href="/sub/10/0/"><i class="flaticon-apps"></i></a><a href="','')
+                #removes all of the irrelevant html info from before the url
+                currenturl=currenturl.split('">', 1)[0]
+                #removes irrelevant information from after the url
+                currenturl="http://www.1337x.to"+currenturl
+                currentseeders=seeders[i-1]
+                currentseeders=str(currentseeders)
+                currentseeders=currentseeders.replace('<td class="coll-2 seeds">','')
+                currentseeders=currentseeders.split('</td>', 1)[0]
+                print(currenttitle)
+                print(currenturl)
+                print(currentseeders)
+                
+                i = i+1
+            else:
+                print("No Results from 1337x")
+                break
 
 
 def restart():
@@ -121,7 +155,7 @@ def restart():
     searchedframe3.pack_forget()
     tooshort = False
     # chosensite=False
-    searchbutton()
+    mainmenu()
 
 
 def searched():
@@ -140,11 +174,11 @@ def searched():
     searchedframe2.pack()
     searchedframe3 = Frame(window)
     searchedframe3.pack()
-#    if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
-#        searchbutton()
-#        tooshort=False
-#    else:
-#        print("")
+    # if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
+    # mainmenu()
+    # tooshort=False
+    # else:
+    # print("")
     if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or limetorrents.get() == 1 or katcr.get() == 1 or torrentdownloads.get() == 1:
         print("")
         chosensite = True
@@ -155,11 +189,13 @@ def searched():
     if thepiratebay.get():
         piratebaylabel = Label(searchedframe2, text="ThePirateBay.org")
         piratebaylabel.pack(side=LEFT)
+        scraper.piratebayscraper()
     else:
         print("")
     if x1337.get():
         x1337label = Label(searchedframe2, text="1337x.to")
         x1337label.pack(side=LEFT)
+        scraper.x1337scraper()
     else:
         print("")
     if rarbg.get():
@@ -212,7 +248,7 @@ def searched():
             # menuframe2.destroy()
             # menuframe3.destroy()
             tooshort = True
-            searchbutton()
+            mainmenu()
             # clears everything and sets the variable "tooshort" to true for future use
         else:
             tooshort = False
@@ -232,7 +268,7 @@ def searched():
             # menuframe1.destroy()
             # menuframe2.destroy()
             # menuframe3.destroy()
-            searchbutton()
+            mainmenu()
             # clears everything
         else:
             print("")
@@ -250,12 +286,12 @@ def cleartext():
     # Clears the menuframes so they can be remade
     menuframe2.pack_forget()
     menuframe3.pack_forget()
-    searchbutton()
+    mainmenu()
     tooshort = False
     chosensite = False
 
 
-def searchbutton():
+def mainmenu():
     global chosensite
     global tooshort
     global window
@@ -332,7 +368,7 @@ def searchbutton():
 
 
 # Declare Global Variables
-global search
+"""global search
 global searchbox
 global window
 global thepiratebay
@@ -345,7 +381,7 @@ global menuframe1
 global menuframe2
 global menuframe3
 global tooshort
-global chosensite
+global chosensite"""
 
 chosensite = True
 tooshort = False
@@ -360,7 +396,7 @@ limetorrents = IntVar(window)
 katcr = IntVar(window)
 torrentdownloads = IntVar(window)
 # Declare future variables used in widgets
-searchbutton()
+mainmenu()
 # Calls first function
 window.mainloop()
 # Starts the window loop to keep it open
