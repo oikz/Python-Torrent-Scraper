@@ -79,7 +79,6 @@ class scraper:
         # print for testing purposes
 
     def x1337scraper():
-        print("Nice")
         global searchterm
         x1337url = "https://1337x.to/search/search+term/1/"
         # base url for the program to modify
@@ -87,6 +86,7 @@ class scraper:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko)' 'Chrome/41.0.2227.1 Safari/537.36'}
         # sets a "headers" because 1337x "declines" the request for the html because it thinks thats not a browser
+        #literlly stole this from stack overflow
         x1337url = x1337url.replace('search+term', replacewith)
         # replaces the search+term in the url with the users chosen search term
         response = requests.get(x1337url.replace(
@@ -201,21 +201,25 @@ def searched():
     if rarbg.get():
         rarbglabel = Label(searchedframe2, text="rarbg.to")
         rarbglabel.pack(side=LEFT)
+        scraper.rarbgscraper()
     else:
         print("")
     if limetorrents.get():
         limetorrentslabel = Label(searchedframe2, text="LimeTorrents")
         limetorrentslabel.pack(side=LEFT)
+        scraper.limetorrentsscraper()
     else:
         print("")
     if katcr.get():
         katcrlabel = Label(searchedframe2, text="Kickass Torrents")
         katcrlabel.pack(side=LEFT)
+        scraper.katcrscraper()
     else:
         print("")
     if torrentdownloads.get():
         torrentdownloadslabel = Label(searchedframe2, text="Torrent Downloads")
         torrentdownloadslabel.pack(side=LEFT)
+        scraper.torrentdownloadsscraper()
     title.pack()
 
     tryagainbutton = Button(searchedframe3, text="New Search", command=restart)
@@ -367,28 +371,13 @@ def mainmenu():
     #
 
 
-# Declare Global Variables
-"""global search
-global searchbox
-global window
-global thepiratebay
-global x1337
-global rarbg
-global limetorrents
-global katcr
-global torrentdownloads
-global menuframe1
-global menuframe2
-global menuframe3
-global tooshort
-global chosensite"""
-
+#Declare Global Variables
 chosensite = True
 tooshort = False
 window = ""
 window = Tk()
 window.geometry('650x250')
-# Set window size to 650x250 pixels
+# Set window size to 650x250 pixels which works well for the things in my project
 thepiratebay = IntVar(window)
 x1337 = IntVar(window)
 rarbg = IntVar(window)
