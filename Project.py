@@ -35,7 +35,7 @@ class scraper:
             # deletes the leechers of each file as it wont be in the program
             # may be added at a later date
         except:
-            scraper()
+            print("Piratebay Ded")
         # placed in try accept as the website can go down and may break this part of the program
         i = 0
         # sets a base i value of 0 to be used next
@@ -86,11 +86,12 @@ class scraper:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko)' 'Chrome/41.0.2227.1 Safari/537.36'}
         # sets a "headers" because 1337x "declines" the request for the html because it thinks thats not a browser
-        #literlly stole this from stack overflow
+        # literlly stole this from stack overflow
         x1337url = x1337url.replace('search+term', replacewith)
         # replaces the search+term in the url with the users chosen search term
-        response = requests.get(x1337url.replace(
-            'search+term', replacewith), headers=headers)
+        response = requests.get(x1337url, headers=headers)
+        # .replace(
+        #    'search+term', replacewith), headers=headers)
         # print(x1337url)
         # requests the html of the page
         html = response.text
@@ -115,35 +116,63 @@ class scraper:
                 # gets a title based on the value of i
                 currenttitle = currenttitle.text
                 currentcomment = comments[i-1]
-                #grabs comments at i-1 as i is based on the coll-1 name classes which ignore the first one
-                currentcomment=str(currentcomment)
-                #converts to string
-                currentcomment=currentcomment.replace('<span class="comments"><i class="flaticon-message"></i>','')
-                #removes everything before the number of comments
-                currentcomment=currentcomment.split('</span>', 1)[0]
+                # grabs comments at i-1 as i is based on the coll-1 name classes which ignore the first one
+                currentcomment = str(currentcomment)
+                # converts to string
+                currentcomment = currentcomment.replace(
+                    '<span class="comments"><i class="flaticon-message"></i>', '')
+                # removes everything before the number of comments
+                currentcomment = currentcomment.split('</span>', 1)[0]
                 currenttitle = currenttitle.replace(currentcomment, '')
                 # replaces the number at the end of the title (the number of comments) with a blank space
                 currenturl = titles[i]
-                #print(currenturl)
-                currenturl=str(currenturl)
-                #converts currenturl to a string
-                currenturl = currenturl.replace('<td class="coll-1 name"><a class="icon" href="/sub/10/0/"><i class="flaticon-apps"></i></a><a href="','')
-                #removes all of the irrelevant html info from before the url
-                currenturl=currenturl.split('">', 1)[0]
-                #removes irrelevant information from after the url
-                currenturl="http://www.1337x.to"+currenturl
-                currentseeders=seeders[i-1]
-                currentseeders=str(currentseeders)
-                currentseeders=currentseeders.replace('<td class="coll-2 seeds">','')
-                currentseeders=currentseeders.split('</td>', 1)[0]
+                # print(currenturl)
+                currenturl = str(currenturl)
+                # converts currenturl to a string
+                currenturl = currenturl.replace(
+                    '<td class="coll-1 name"><a class="icon" href="/sub/10/0/"><i class="flaticon-apps"></i></a><a href="', '')
+                # removes all of the irrelevant html info from before the url
+                currenturl = currenturl.split('">', 1)[0]
+                # removes irrelevant information from after the url
+                currenturl = "http://www.1337x.to"+currenturl
+                currentseeders = seeders[i-1]
+                currentseeders = str(currentseeders)
+                currentseeders = currentseeders.replace(
+                    '<td class="coll-2 seeds">', '')
+                currentseeders = currentseeders.split('</td>', 1)[0]
                 print(currenttitle)
                 print(currenturl)
                 print(currentseeders)
-                
+
                 i = i+1
             else:
                 print("No Results from 1337x")
                 break
+
+    def rarbgscraper():
+        global searchterm
+        rarbgurl = "https://rarbg.to/torrents.php?search=search+term"
+        # base url for the program to modify
+        replacewith = searchbox.get()
+        rarbgurl = rarbgurl.replace('search+term', replacewith)
+        # replaces search+term with the users chosen term
+        rarbgurl = rarbgurl+"&order=seeders&by=DESC"
+        response = requests.get(rarbgurl)
+        # requests the html of the page
+        html = response.text
+        # saves the html as a big string
+        soup = BeautifulSoup(html, "lxml")
+        # parses the html and saves it
+        soup.prettify()
+        # converts the "soup" parse tree into a long string
+        titles = soup.find_all(class_="lista")
+        i = 1
+        while (i <= 48):
+            currenttitle = titles[i]
+            currenttitle = currenttitle.text
+            print(currenttitle)
+            i = i+8
+
 
 class gui:
     def restart():
@@ -156,7 +185,6 @@ class gui:
         tooshort = False
         # chosensite=False
         gui.mainmenu()
-
 
     def searched():
         global chosensite
@@ -185,7 +213,7 @@ class gui:
         else:
             chosensite = False
         title = Label(searchedframe1, text="Results for: " +
-                    searchbox.get(), font=("Arial Bold", 25))
+                      searchbox.get(), font=("Arial Bold", 25))
         if thepiratebay.get():
             piratebaylabel = Label(searchedframe2, text="ThePirateBay.org")
             piratebaylabel.pack(side=LEFT)
@@ -217,12 +245,14 @@ class gui:
         else:
             print("")
         if torrentdownloads.get():
-            torrentdownloadslabel = Label(searchedframe2, text="Torrent Downloads")
+            torrentdownloadslabel = Label(
+                searchedframe2, text="Torrent Downloads")
             torrentdownloadslabel.pack(side=LEFT)
             scraper.torrentdownloadsscraper()
         title.pack()
 
-        tryagainbutton = Button(searchedframe3, text="New Search", command=gui.restart)
+        tryagainbutton = Button(
+            searchedframe3, text="New Search", command=gui.restart)
         tryagainbutton.pack(side=RIGHT)
 
         # original output testing for checkboxes
@@ -280,9 +310,6 @@ class gui:
         except:
             print("")
 
-        scraper()
-
-
     def cleartext():
         searchbox.delete(0, END)
         # Clears the searchbox so the user can try again
@@ -293,7 +320,6 @@ class gui:
         gui.mainmenu()
         tooshort = False
         chosensite = False
-
 
     def mainmenu():
         global chosensite
@@ -371,7 +397,7 @@ class gui:
         #
 
 
-#Declare Global Variables
+# Declare Global Variables
 chosensite = True
 tooshort = False
 window = ""
