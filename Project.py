@@ -1,6 +1,7 @@
 from tkinter import *
 from bs4 import BeautifulSoup
 import requests
+import time
 
 
 class scraper:
@@ -8,7 +9,12 @@ class scraper:
     top5urls = []
     top5seeders = []
 
-    def piratebayscraper():
+    def __init__(self, top5titles, top5urls, top5seeders):
+        self.top5titles = top5titles
+        self.top5urls = top5urls
+        self.top5seeders = top5seeders
+
+    def piratebayscraper(self):
         global searchterm
         piratebayurl = "https://thepiratebay.org/search/search%20term/"
         # base url for the program to modify
@@ -62,23 +68,23 @@ class scraper:
                 # print(currenttitle)
                 # print(currenturl)
                 # print(currentseeders)
-                scraper.top5titles.append(currenttitle)
+                self.top5titles.append(currenttitle)
                 # adds the top 5 torrents into the list
-                scraper.top5urls.append(currenturl)
+                self.top5urls.append(currenturl)
                 # adds the top 5 torrents urls to the list
-                scraper.top5seeders.append(currentseeders)
+                self.top5seeders.append(currentseeders)
                 # adds the top 5 torrents seeders into the list
                 i = i+1
                 # increases i value by one each time
             else:
                 print("No Results from Piratebay")
                 break
-        print(scraper.top5titles)
-        print(scraper.top5urls)
-        print(scraper.top5seeders)
+        print(self.top5titles)
+        print(self.top5urls)
+        print(self.top5seeders)
         # print for testing purposes
 
-    def x1337scraper():
+    def x1337scraper(self):
         global searchterm
         x1337url = "https://1337x.to/search/search+term/1/"
         # base url for the program to modify
@@ -140,16 +146,18 @@ class scraper:
                 currentseeders = currentseeders.replace(
                     '<td class="coll-2 seeds">', '')
                 currentseeders = currentseeders.split('</td>', 1)[0]
-                print(currenttitle)
-                print(currenturl)
-                print(currentseeders)
-
+                self.top5titles.append(currenttitle)
+                self.top5urls.append(currenturl)
+                self.top5seeders.append(currentseeders)
                 i = i+1
             else:
                 print("No Results from 1337x")
                 break
+        print(self.top5titles)
+        print(self.top5urls)
+        print(self.top5seeders)
 
-    def rarbgscraper():
+    def rarbgscraper(self):
         global searchterm
         rarbgurl = "https://rarbg.to/torrents.php?search=search+term"
         # base url for the program to modify
@@ -167,11 +175,39 @@ class scraper:
         # converts the "soup" parse tree into a long string
         titles = soup.find_all(class_="lista")
         i = 1
-        while (i <= 48):
-            currenttitle = titles[i]
+        while (i <= 40):
+            currenttitle = titles[i+13]
             currenttitle = currenttitle.text
-            print(currenttitle)
+            currenturl = titles[i+13]
+            currenturl = str(currenturl)
+            currenturl = currenturl.replace('<td align="left" class="lista"><a href="', '')
+            print(currenturl)
+            currentseeders = titles[i+16]
+            currentseeders = currentseeders.text
+            self.top5titles.append(currenttitle)
+            self.top5urls.append(currenturl)
+            self.top5seeders.append(currentseeders)
+            print(self.top5titles)
+            print(self.top5seeders)
             i = i+8
+
+    #def limetorrentsscraper(self):
+    #    global searchterm
+    #    limetorrentsurl="https://www.limetorrents.info/search/all/search-term/"
+    #    replacewith= searchbox.get()
+    #    limetorrentsurl=limetorrentsurl.replace('search-term', replacewith)
+    #    limetorrentsurl=limetorrentsurl+'/seeds/1/'
+    #    response = requests.get(limetorrentsurl)
+    #    # requests the html of the page
+    #    html = response.text
+    #    # saves the html as a big string
+    #    soup = BeautifulSoup(html, "lxml")
+    #    # parses the html and saves it
+    #    soup.prettify()
+    #    # converts the "soup" parse tree into a long string object thing
+    #    # titles = soup.find_all(class_="lista")
+    #    i = 1
+
 
 
 class gui:
@@ -217,27 +253,31 @@ class gui:
         if thepiratebay.get():
             piratebaylabel = Label(searchedframe2, text="ThePirateBay.org")
             piratebaylabel.pack(side=LEFT)
-            scraper.piratebayscraper()
+            piratebayobj = scraper([], [], [])
+            piratebayobj.piratebayscraper()
         else:
             print("")
         if x1337.get():
             x1337label = Label(searchedframe2, text="1337x.to")
             x1337label.pack(side=LEFT)
-            scraper.x1337scraper()
+            x1337obj = scraper([], [], [])
+            x1337obj.x1337scraper()
         else:
             print("")
         if rarbg.get():
             rarbglabel = Label(searchedframe2, text="rarbg.to")
             rarbglabel.pack(side=LEFT)
-            scraper.rarbgscraper()
+            rarbgobj = scraper([], [], [])
+            rarbgobj.rarbgscraper()
         else:
             print("")
-        if limetorrents.get():
-            limetorrentslabel = Label(searchedframe2, text="LimeTorrents")
-            limetorrentslabel.pack(side=LEFT)
-            scraper.limetorrentsscraper()
-        else:
-            print("")
+        #if limetorrents.get():
+        #    limetorrentslabel = Label(searchedframe2, text="LimeTorrents")
+        #    limetorrentslabel.pack(side=LEFT)
+        #    limetorrentsobj=scraper([], [], [])
+        #    limetorrentsobj.limetorrentsscraper()
+        #else:
+        #    print("")
         if katcr.get():
             katcrlabel = Label(searchedframe2, text="Kickass Torrents")
             katcrlabel.pack(side=LEFT)
@@ -383,9 +423,9 @@ class gui:
         checkbox3 = Checkbutton(menuframe2, text="Rarbg", variable=rarbg)
         checkbox3.pack(side=LEFT)
         #
-        checkbox4 = Checkbutton(
-            menuframe3, text="Lime Torrents", variable=limetorrents)
-        checkbox4.pack(side=LEFT)
+        #checkbox4 = Checkbutton(
+        #    menuframe3, text="Lime Torrents", variable=limetorrents)
+        #checkbox4.pack(side=LEFT)
         #
         checkbox5 = Checkbutton(
             menuframe3, text="Kickass Torrents", variable=katcr)
