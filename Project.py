@@ -187,26 +187,38 @@ class scraper:
             self.top5titles.append(currenttitle)
             self.top5urls.append(currenturl)
             self.top5seeders.append(currentseeders)
-            print(self.top5titles)
-            print(self.top5seeders)
             i = i+8
+        print(self.top5titles)
+        print(self.top5seeders)
+        print(self.top5urls)
 
-    #def limetorrentsscraper(self):
-    #    global searchterm
-    #    limetorrentsurl="https://www.limetorrents.info/search/all/search-term/"
-    #    replacewith= searchbox.get()
-    #    limetorrentsurl=limetorrentsurl.replace('search-term', replacewith)
-    #    limetorrentsurl=limetorrentsurl+'/seeds/1/'
-    #    response = requests.get(limetorrentsurl)
-    #    # requests the html of the page
-    #    html = response.text
-    #    # saves the html as a big string
-    #    soup = BeautifulSoup(html, "lxml")
-    #    # parses the html and saves it
-    #    soup.prettify()
-    #    # converts the "soup" parse tree into a long string object thing
-    #    # titles = soup.find_all(class_="lista")
-    #    i = 1
+    def zooqlescraper(self):
+        global searchterm
+        zooqleurl="https://zooqle.com/search?q=Search+Term"
+        replacewith= searchbox.get()
+        zooqleurl=zooqleurl.replace('Search+Term', replacewith)
+        zooqleurl=zooqleurl+'&s=ns&v=t&sd=d'
+        response = requests.get(zooqleurl)
+        # requests the html of the page
+        html = response.text
+        # saves the html as a big string
+        soup = BeautifulSoup(html, "lxml")
+        # parses the html and saves it
+        soup.prettify()
+        # converts the "soup" parse tree into a long string object thing
+        titles = soup.find_all(class_="text-trunc text-nowrap")
+        i = 0
+        while (i <= 5):
+            currenttitle=titles[i]
+            #currenttitle=currenttitle.text
+            currenttitle=str(currenttitle)
+            currenttitle2=currenttitle.split('<hl>', 1)[1]
+            currenttitle2=currenttitle2+currenttitle[2]
+            currenttitle2=currenttitle2.split('</a>', 1)[0]
+            currenttitle2=currenttitle2.replace('</hl>','')
+            print(currenttitle2)
+            i=i+1
+
 
 
 
@@ -243,7 +255,7 @@ class gui:
         # tooshort=False
         # else:
         # print("")
-        if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or limetorrents.get() == 1 or katcr.get() == 1 or torrentdownloads.get() == 1:
+        if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or zooqle.get() == 1 or katcr.get() == 1 or torrentdownloads.get() == 1:
             print("")
             chosensite = True
         else:
@@ -271,17 +283,18 @@ class gui:
             rarbgobj.rarbgscraper()
         else:
             print("")
-        #if limetorrents.get():
-        #    limetorrentslabel = Label(searchedframe2, text="LimeTorrents")
-        #    limetorrentslabel.pack(side=LEFT)
-        #    limetorrentsobj=scraper([], [], [])
-        #    limetorrentsobj.limetorrentsscraper()
-        #else:
-        #    print("")
+        if zooqle.get():
+            zooqlelabel = Label(searchedframe2, text="zooqle")
+            zooqlelabel.pack(side=LEFT)
+            zooqleobj=scraper([], [], [])
+            zooqleobj.zooqlescraper()
+        else:
+            print("")
         if katcr.get():
             katcrlabel = Label(searchedframe2, text="Kickass Torrents")
             katcrlabel.pack(side=LEFT)
-            scraper.katcrscraper()
+            katcrobj = scraper([], [], [])
+            katcrobj.katcrscraper()
         else:
             print("")
         if torrentdownloads.get():
@@ -302,8 +315,8 @@ class gui:
         # print(x1337.get())
         # print("rarbg")
         # print(rarbg.get())
-        # print("limetorrents")
-        # print(limetorrents.get())
+        # print("zooqle")
+        # print(zooqle.get())
         # print("katcr")
         # print(katcr.get())
         # print("torrentdownloads")
@@ -423,17 +436,16 @@ class gui:
         checkbox3 = Checkbutton(menuframe2, text="Rarbg", variable=rarbg)
         checkbox3.pack(side=LEFT)
         #
-        #checkbox4 = Checkbutton(
-        #    menuframe3, text="Lime Torrents", variable=limetorrents)
-        #checkbox4.pack(side=LEFT)
+        checkbox4 = Checkbutton(menuframe3, text="Zooqle", variable=zooqle)
+        checkbox4.pack(side=LEFT)
         #
-        checkbox5 = Checkbutton(
-            menuframe3, text="Kickass Torrents", variable=katcr)
-        checkbox5.pack(side=LEFT)
+        #checkbox5 = Checkbutton(
+        #    menuframe3, text="Kickass Torrents", variable=katcr)
+        #checkbox5.pack(side=LEFT)
         #
-        checkbox6 = Checkbutton(
-            menuframe3, text="Torrent Downloads", variable=torrentdownloads)
-        checkbox6.pack(side=LEFT)
+        #checkbox6 = Checkbutton(
+        #    menuframe3, text="Torrent Downloads", variable=torrentdownloads)
+        #checkbox6.pack(side=LEFT)
         #
 
 
@@ -447,7 +459,7 @@ window.geometry('650x250')
 thepiratebay = IntVar(window)
 x1337 = IntVar(window)
 rarbg = IntVar(window)
-limetorrents = IntVar(window)
+zooqle = IntVar(window)
 katcr = IntVar(window)
 torrentdownloads = IntVar(window)
 # Declare future variables used in widgets
