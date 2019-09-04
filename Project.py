@@ -207,17 +207,36 @@ class scraper:
         soup.prettify()
         # converts the "soup" parse tree into a long string object thing
         titles = soup.find_all(class_="text-trunc text-nowrap")
+        seeders = soup.find_all(class_="progress-bar smaller prog-green prog-l")
         i = 0
-        while (i <= 5):
+        while (i <= 4):
             currenttitle=titles[i]
-            #currenttitle=currenttitle.text
             currenttitle=str(currenttitle)
-            currenttitle2=currenttitle.split('<hl>', 1)[1]
-            currenttitle2=currenttitle2+currenttitle[2]
+            currenttitle2=currenttitle.split('">')[3]
             currenttitle2=currenttitle2.split('</a>', 1)[0]
+            currenttitle2=currenttitle2.replace('<hl>','')
             currenttitle2=currenttitle2.replace('</hl>','')
-            print(currenttitle2)
+            currenturl=titles[i]
+            ##
+            currenturl=str(currenturl)
+            currenturl=currenturl.split('<a class="small"', 1)[1]
+            currenturl=currenturl.replace(' href="','')
+            currenturl=currenturl.split('">')[0]
+            currenturl=currenturl.replace(' /','')
+            currenturl="https://zooqle.com"+currenturl
+            ##
+            currentseeders=seeders[i]
+            currentseeders=currentseeders.text
+            currentseeders=currentseeders.replace(' K','K')
+            #removes the gap before the K because i didnt like it
+            self.top5titles.append(currenttitle2)
+            self.top5urls.append(currenturl)
+            self.top5seeders.append(currentseeders)
+            print(currenttitle2)            
+            print(currenturl)
+            print(currentseeders)
             i=i+1
+
 
 
 
