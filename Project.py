@@ -2,12 +2,13 @@ from tkinter import *
 from bs4 import BeautifulSoup
 import requests
 import time
+import webbrowser
 
 
 class scraper:
-    top5titles = []
-    top5urls = []
-    top5seeders = []
+    #top5titles = []
+    #top5urls = []
+    #top5seeders = []
 
     def __init__(self, top5titles, top5urls, top5seeders):
         self.top5titles = top5titles
@@ -16,32 +17,40 @@ class scraper:
 
     def piratebayscraper(self):
         global searchterm
+        titles = []
         piratebayurl = "https://thepiratebay.org/search/search%20term/"
         # base url for the program to modify
         replacewith = searchbox.get()
         piratebayurl.replace('search%20term', replacewith)
         # replaces the search%20term in the url with the users chosen search term
-        response = requests.get(
-            piratebayurl.replace('search%20term', replacewith))
-        # requests the html of the page
-        html = response.text
-        # saves the html as a big string
-        soup = BeautifulSoup(html, "lxml")
-        # does some magic
-        soup.prettify()
-        # prettifies it?
+        # try accept in an attempt to fix problems with specific websites not working
         try:
-            # try accept in an attempt to fix problems with specific websites not working
-            titles = soup.find_all(class_="detLink")
-            # creates an object containing all of the tags in the webpage that contain the class "detLink"
-            # all these tags include a title of the torrent, a link to the download page and comments etc that can be added later
-            seeders = soup.find_all('td', {'align': 'right'})
-            # finds all tags that have the align right attribute which is all of the seeders and leechers information
-            del seeders[1::2]
-            # deletes the leechers of each file as it wont be in the program
-            # may be added at a later date
+            response = requests.get(
+                piratebayurl.replace('search%20term', replacewith))
+            # requests the html of the page
+            html = response.text
+            # saves the html as a big string
+            soup = BeautifulSoup(html, "lxml")
+            # does some magic
+            soup.prettify()
+            # prettifies it?
         except:
-            print("Piratebay Ded")
+            print("Big error Lol")
+
+        titles = soup.find_all(class_="detLink")
+        # creates an object containing all of the tags in the webpage that contain the class "detLink"
+        # all these tags include a title of the torrent, a link to the download page and comments etc that can be added later
+        seeders = soup.find_all('td', {'align': 'right'})
+        # finds all tags that have the align right attribute which is all of the seeders and leechers information
+        del seeders[1::2]
+        # deletes the leechers of each file as it wont be in the program
+        # may be added at a later date
+        if html.find("The initial connection between Cloudflare's network and the origin web server timed out. As a result, the web page can not be displayed.") == -1:
+            # if it can find the phrase
+            print("Website seems to work")
+        else:
+            print("Retrying")
+            piratebayobj.piratebayscraper()
         # placed in try accept as the website can go down and may break this part of the program
         i = 0
         # sets a base i value of 0 to be used next
@@ -76,16 +85,20 @@ class scraper:
                 # adds the top 5 torrents seeders into the list
                 i = i+1
                 # increases i value by one each time
+                # print(currenttitle)
+                # print(currenturl)
+                # print(currentseeders)
             else:
                 print("No Results from Piratebay")
                 break
-        print(self.top5titles)
-        print(self.top5urls)
-        print(self.top5seeders)
+        # print(self.top5titles)
+        # print(self.top5urls)
+        # print(self.top5seeders)
         # print for testing purposes
 
     def x1337scraper(self):
         global searchterm
+        titles = []
         x1337url = "https://1337x.to/search/search+term/1/"
         # base url for the program to modify
         replacewith = searchbox.get()
@@ -150,15 +163,19 @@ class scraper:
                 self.top5urls.append(currenturl)
                 self.top5seeders.append(currentseeders)
                 i = i+1
+                # print(currenttitle)
+                # print(currenturl)
+                # print(currentseeders)
             else:
                 print("No Results from 1337x")
                 break
-        print(self.top5titles)
-        print(self.top5urls)
-        print(self.top5seeders)
+        # print(self.top5titles)
+        # print(self.top5urls)
+        # print(self.top5seeders)
 
     def rarbgscraper(self):
         global searchterm
+        titles = []
         rarbgurl = "https://rarbg.to/torrents.php?search=search+term"
         # base url for the program to modify
         replacewith = searchbox.get()
@@ -176,28 +193,38 @@ class scraper:
         titles = soup.find_all(class_="lista")
         i = 1
         while (i <= 40):
-            currenttitle = titles[i+13]
-            currenttitle = currenttitle.text
-            currenturl = titles[i+13]
-            currenturl = str(currenturl)
-            currenturl = currenturl.replace('<td align="left" class="lista"><a href="', '')
-            print(currenturl)
-            currentseeders = titles[i+16]
-            currentseeders = currentseeders.text
-            self.top5titles.append(currenttitle)
-            self.top5urls.append(currenturl)
-            self.top5seeders.append(currentseeders)
-            i = i+8
-        print(self.top5titles)
-        print(self.top5seeders)
-        print(self.top5urls)
+            if titles != []:
+                currenttitle = titles[i+13]
+                currenttitle = currenttitle.text
+                currenttitle = currenttitle.split('title="')
+                currenturl = titles[i+13]
+                currenturl = str(currenturl)
+                currenturl = currenturl.replace(
+                    '<td align="left" class="lista"><a href="', '')
+                currenturl = currenturl.split('" onmouseout')[0]
+                currenturl = rarbgurl.replace("search+term", currenturl)
+                currentseeders = titles[i+16]
+                currentseeders = currentseeders.text
+                self.top5titles.append(currenttitle)
+                self.top5urls.append(currenturl)
+                self.top5seeders.append(currentseeders)
+                i = i+8
+                # print(currenttitle)
+                # print(currenturl)
+                # print(currentseeders)
+            else:
+                print("No Results from rarbg")
+                break
+        # print(self.top5titles)
+        # print(self.top5seeders)
+        # print(self.top5urls)
 
     def zooqlescraper(self):
         global searchterm
-        zooqleurl="https://zooqle.com/search?q=Search+Term"
-        replacewith= searchbox.get()
-        zooqleurl=zooqleurl.replace('Search+Term', replacewith)
-        zooqleurl=zooqleurl+'&s=ns&v=t&sd=d'
+        zooqleurl = "https://zooqle.com/search?q=Search+Term"
+        replacewith = searchbox.get()
+        zooqleurl = zooqleurl.replace('Search+Term', replacewith)
+        zooqleurl = zooqleurl+'&s=ns&v=t&sd=d'
         response = requests.get(zooqleurl)
         # requests the html of the page
         html = response.text
@@ -207,59 +234,75 @@ class scraper:
         soup.prettify()
         # converts the "soup" parse tree into a long string object thing
         titles = soup.find_all(class_="text-trunc text-nowrap")
-        seeders = soup.find_all(class_="progress-bar smaller prog-green prog-l")
+        seeders = soup.find_all(
+            class_="progress-bar smaller prog-green prog-l")
         i = 0
         while (i <= 4):
-            currenttitle=titles[i]
-            currenttitle=str(currenttitle)
-            currenttitle2=currenttitle.split('">')[3]
-            currenttitle2=currenttitle2.split('</a>', 1)[0]
-            currenttitle2=currenttitle2.replace('<hl>','')
-            currenttitle2=currenttitle2.replace('</hl>','')
-            currenturl=titles[i]
-            ##
-            currenturl=str(currenturl)
-            currenturl=currenturl.split('<a class="small"', 1)[1]
-            currenturl=currenturl.replace(' href="','')
-            currenturl=currenturl.split('">')[0]
-            currenturl=currenturl.replace(' /','')
-            currenturl="https://zooqle.com"+currenturl
-            ##
-            currentseeders=seeders[i]
-            currentseeders=currentseeders.text
-            currentseeders=currentseeders.replace(' K','K')
-            #removes the gap before the K because i didnt like it
-            self.top5titles.append(currenttitle2)
-            self.top5urls.append(currenturl)
-            self.top5seeders.append(currentseeders)
-            print(currenttitle2)            
-            print(currenturl)
-            print(currentseeders)
-            i=i+1
-
-
-
+            if titles != []:
+                currenttitle = titles[i]
+                currenttitle = str(currenttitle)
+                currenttitle2 = currenttitle.split('">')[3]
+                currenttitle2 = currenttitle2.split('</a>', 1)[0]
+                currenttitle2 = currenttitle2.replace('<hl>', '')
+                currenttitle2 = currenttitle2.replace('</hl>', '')
+                currenturl = titles[i]
+                ##
+                currenturl = str(currenturl)
+                currenturl = currenturl.split('<a class="small"', 1)[1]
+                currenturl = currenturl.replace(' href="', '')
+                currenturl = currenturl.split('">')[0]
+                currenturl = currenturl.replace(' /', '')
+                currenturl = "https://zooqle.com"+currenturl
+                ##
+                currentseeders = seeders[i]
+                currentseeders = currentseeders.text
+                currentseeders = currentseeders.replace(' K', 'K')
+                # removes the gap before the K because i didnt like it
+                self.top5titles.append(currenttitle2)
+                self.top5urls.append(currenturl)
+                self.top5seeders.append(currentseeders)
+                # print(currenttitle2)
+                # print(currenturl)
+                # print(currentseeders)
+                i = i+1
+            else:
+                print("No Results from Zooqle")
+                break
 
 
 class gui:
-    def restart():
+    def __init__(self, alltitles, allurls, allseeders):
+        self.alltitles = alltitles
+        self.allurls = allurls
+        self.allseeders = allseeders
+
+    def callback(url):
+        webbrowser.open_new(url)
+
+    def restart(self):
         menuframe1.pack_forget()
         menuframe2.pack_forget()
         menuframe3.pack_forget()
         searchedframe1.pack_forget()
         searchedframe2.pack_forget()
         searchedframe3.pack_forget()
+        searchedframe4.pack_forget()
         tooshort = False
         # chosensite=False
-        gui.mainmenu()
+        guiobject.mainmenu()
 
-    def searched():
+    def searched(self):
         global chosensite
         global searchedframe1
         global searchedframe2
         global searchedframe3
+        global searchedframe4
         global tooshort
         global title
+        global piratebayobj
+        alltitles = []
+        allurls = []
+        allseeders = []
         menuframe1.pack_forget()
         menuframe2.pack_forget()
         menuframe3.pack_forget()
@@ -269,6 +312,8 @@ class gui:
         searchedframe2.pack()
         searchedframe3 = Frame(window)
         searchedframe3.pack()
+        searchedframe4 = Frame(window)
+        searchedframe4.pack()
         # if searchbox.get()=="Must be longer than 3 characters" or tooshort==True:
         # mainmenu()
         # tooshort=False
@@ -286,6 +331,8 @@ class gui:
             piratebaylabel.pack(side=LEFT)
             piratebayobj = scraper([], [], [])
             piratebayobj.piratebayscraper()
+            alltitles = alltitles+piratebayobj.top5titles
+            allurls = allurls+piratebayobj.top5urls
         else:
             print("")
         if x1337.get():
@@ -293,6 +340,8 @@ class gui:
             x1337label.pack(side=LEFT)
             x1337obj = scraper([], [], [])
             x1337obj.x1337scraper()
+            alltitles = alltitles+x1337obj.top5titles
+            allurls = allurls+x1337obj.top5urls
         else:
             print("")
         if rarbg.get():
@@ -300,31 +349,34 @@ class gui:
             rarbglabel.pack(side=LEFT)
             rarbgobj = scraper([], [], [])
             rarbgobj.rarbgscraper()
+            alltitles = alltitles+rarbgobj.top5titles
+            allurls = allurls+rarbgobj.top5urls
         else:
             print("")
         if zooqle.get():
             zooqlelabel = Label(searchedframe2, text="zooqle")
             zooqlelabel.pack(side=LEFT)
-            zooqleobj=scraper([], [], [])
+            zooqleobj = scraper([], [], [])
             zooqleobj.zooqlescraper()
+            alltitles = alltitles+zooqleobj.top5titles
+            allurls = allurls+zooqleobj.top5urls
         else:
             print("")
-        if katcr.get():
-            katcrlabel = Label(searchedframe2, text="Kickass Torrents")
-            katcrlabel.pack(side=LEFT)
-            katcrobj = scraper([], [], [])
-            katcrobj.katcrscraper()
-        else:
-            print("")
-        if torrentdownloads.get():
-            torrentdownloadslabel = Label(
-                searchedframe2, text="Torrent Downloads")
-            torrentdownloadslabel.pack(side=LEFT)
-            scraper.torrentdownloadsscraper()
         title.pack()
 
+        print(alltitles)
+        print(allurls)
+        titlelist = Text(searchedframe4)
+        for i in alltitles:
+            titlelist.insert(END, i + '\n')
+            # currenturl=allurls[i]
+            titlelist.bind("<Button-1>", lambda e: gui.callback(currenturl))
+        titlelist.pack(side=LEFT)
+        #    i=0
+        #    titlelist=Label(searchedframe2, text=scraper.top5titles[i])
+
         tryagainbutton = Button(
-            searchedframe3, text="New Search", command=gui.restart)
+            searchedframe3, text="New Search", command=guiobject.restart)
         tryagainbutton.pack(side=RIGHT)
 
         # original output testing for checkboxes
@@ -347,6 +399,7 @@ class gui:
                 searchedframe1.pack_forget()
                 searchedframe2.pack_forget()
                 searchedframe3.pack_forget()
+                searchedframe4.pack_forget()
                 menuframe1.pack_forget()
                 menuframe2.pack_forget()
                 menuframe3.pack_forget()
@@ -354,7 +407,7 @@ class gui:
                 # menuframe2.destroy()
                 # menuframe3.destroy()
                 tooshort = True
-                gui.mainmenu()
+                guiobject.mainmenu()
                 # clears everything and sets the variable "tooshort" to true for future use
             else:
                 tooshort = False
@@ -368,13 +421,14 @@ class gui:
                 searchedframe1.pack_forget()
                 searchedframe2.pack_forget()
                 searchedframe3.pack_forget()
+                searchedframe4.pack_forget()
                 menuframe1.pack_forget()
                 menuframe2.pack_forget()
                 menuframe3.pack_forget()
                 # menuframe1.destroy()
                 # menuframe2.destroy()
                 # menuframe3.destroy()
-                gui.mainmenu()
+                guiobject.mainmenu()
                 # clears everything
             else:
                 print("")
@@ -382,18 +436,18 @@ class gui:
         except:
             print("")
 
-    def cleartext():
+    def cleartext(self):
         searchbox.delete(0, END)
         # Clears the searchbox so the user can try again
         menuframe1.pack_forget()
         # Clears the menuframes so they can be remade
         menuframe2.pack_forget()
         menuframe3.pack_forget()
-        gui.mainmenu()
+        guiobject.mainmenu()
         tooshort = False
         chosensite = False
 
-    def mainmenu():
+    def mainmenu(self):
         global chosensite
         global tooshort
         global window
@@ -437,11 +491,11 @@ class gui:
         # A basic searchbox for the user to enter their search term to be used by the program to search sites
         # Packs the searchbox into the menuframe, aligned TOP and with a padding of 10px above and below
         # Adds a background text to the box to tell the user that the search must be longer than 3 characters
-        search = Button(menuframe1, text="Search", command=gui.searched)
+        search = Button(menuframe1, text="Search", command=guiobject.searched)
         search.pack(side=RIGHT)
         # Adds a search button for the user to execute the search with their chosen options and executes the searched() function
         # Packs button to the right
-        clear = Button(menuframe1, text="Clear", command=gui.cleartext)
+        clear = Button(menuframe1, text="Clear", command=guiobject.cleartext)
         clear.pack(side=RIGHT)
         # Adds a Clear button for the user to clear their search preferences
         checkbox1 = Checkbutton(
@@ -458,13 +512,13 @@ class gui:
         checkbox4 = Checkbutton(menuframe3, text="Zooqle", variable=zooqle)
         checkbox4.pack(side=LEFT)
         #
-        #checkbox5 = Checkbutton(
+        # checkbox5 = Checkbutton(
         #    menuframe3, text="Kickass Torrents", variable=katcr)
-        #checkbox5.pack(side=LEFT)
+        # checkbox5.pack(side=LEFT)
         #
-        #checkbox6 = Checkbutton(
+        # checkbox6 = Checkbutton(
         #    menuframe3, text="Torrent Downloads", variable=torrentdownloads)
-        #checkbox6.pack(side=LEFT)
+        # checkbox6.pack(side=LEFT)
         #
 
 
@@ -482,7 +536,8 @@ zooqle = IntVar(window)
 katcr = IntVar(window)
 torrentdownloads = IntVar(window)
 # Declare future variables used in widgets
-gui.mainmenu()
+guiobject = gui([], [], [])
+guiobject.mainmenu()
 # Calls first function
 window.mainloop()
 # Starts the window loop to keep it open
