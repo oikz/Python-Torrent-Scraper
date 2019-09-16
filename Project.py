@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 from bs4 import BeautifulSoup
 import requests
 import time
@@ -24,18 +25,15 @@ class scraper:
         piratebayurl.replace('search%20term', replacewith)
         # replaces the search%20term in the url with the users chosen search term
         # try accept in an attempt to fix problems with specific websites not working
-        try:
-            response = requests.get(
-                piratebayurl.replace('search%20term', replacewith))
-            # requests the html of the page
-            html = response.text
-            # saves the html as a big string
-            soup = BeautifulSoup(html, "lxml")
-            # does some magic
-            soup.prettify()
-            # prettifies it?
-        except:
-            print("Big error Lol")
+        response = requests.get(
+            piratebayurl.replace('search%20term', replacewith))
+        # requests the html of the page
+        html = response.text
+        # saves the html as a big string
+        soup = BeautifulSoup(html, "lxml")
+        # does some magic
+        soup.prettify()
+        # prettifies it?
 
         titles = soup.find_all(class_="detLink")
         # creates an object containing all of the tags in the webpage that contain the class "detLink"
@@ -81,7 +79,7 @@ class scraper:
                 # adds the top 5 torrents into the list
                 self.top5urls.append(currenturl)
                 # adds the top 5 torrents urls to the list
-                self.top5seeders.append(currentseeders)
+                self.top5seeders.append(int(currentseeders))
                 # adds the top 5 torrents seeders into the list
                 i = i+1
                 # increases i value by one each time
@@ -161,7 +159,7 @@ class scraper:
                 currentseeders = currentseeders.split('</td>', 1)[0]
                 self.top5titles.append(currenttitle)
                 self.top5urls.append(currenturl)
-                self.top5seeders.append(currentseeders)
+                self.top5seeders.append(int(currentseeders))
                 i = i+1
                 # print(currenttitle)
                 # print(currenturl)
@@ -178,11 +176,14 @@ class scraper:
         titles = []
         rarbgurl = "https://rarbg.to/torrents.php?search=search+term"
         # base url for the program to modify
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko)' 'Chrome/41.0.2227.1 Safari/537.36'}
+
         replacewith = searchbox.get()
         rarbgurl = rarbgurl.replace('search+term', replacewith)
         # replaces search+term with the users chosen term
         rarbgurl = rarbgurl+"&order=seeders&by=DESC"
-        response = requests.get(rarbgurl)
+        response = requests.get(rarbgurl, headers)
         # requests the html of the page
         html = response.text
         # saves the html as a big string
@@ -207,7 +208,7 @@ class scraper:
                 currentseeders = currentseeders.text
                 self.top5titles.append(currenttitle)
                 self.top5urls.append(currenturl)
-                self.top5seeders.append(currentseeders)
+                self.top5seeders.append(int(currentseeders))
                 i = i+8
                 # print(currenttitle)
                 # print(currenturl)
@@ -248,7 +249,10 @@ class scraper:
                 currenturl = titles[i]
                 ##
                 currenturl = str(currenturl)
-                currenturl = currenturl.split('<a class="small"', 1)[1]
+                if currenturl.find('<a class="small"')!=-1:
+                    currenturl = currenturl.split('<a class="small"', 1)[1]
+                else:
+                    currenturl = currenturl.split('<a class="text-muted2 small"', 1)[1]
                 currenturl = currenturl.replace(' href="', '')
                 currenturl = currenturl.split('">')[0]
                 currenturl = currenturl.replace(' /', '')
@@ -260,7 +264,7 @@ class scraper:
                 # removes the gap before the K because i didnt like it
                 self.top5titles.append(currenttitle2)
                 self.top5urls.append(currenturl)
-                self.top5seeders.append(currentseeders)
+                self.top5seeders.append(int(currentseeders))
                 # print(currenttitle2)
                 # print(currenturl)
                 # print(currentseeders)
@@ -333,6 +337,8 @@ class gui:
             piratebayobj.piratebayscraper()
             alltitles = alltitles+piratebayobj.top5titles
             allurls = allurls+piratebayobj.top5urls
+            allseeders = allseeders+piratebayobj.top5seeders
+
         else:
             print("")
         if x1337.get():
@@ -342,6 +348,8 @@ class gui:
             x1337obj.x1337scraper()
             alltitles = alltitles+x1337obj.top5titles
             allurls = allurls+x1337obj.top5urls
+            allseeders = allseeders+x1337obj.top5seeders
+
         else:
             print("")
         if rarbg.get():
@@ -351,6 +359,8 @@ class gui:
             rarbgobj.rarbgscraper()
             alltitles = alltitles+rarbgobj.top5titles
             allurls = allurls+rarbgobj.top5urls
+            allseeders = allseeders+rarbgobj.top5seeders
+
         else:
             print("")
         if zooqle.get():
@@ -360,18 +370,37 @@ class gui:
             zooqleobj.zooqlescraper()
             alltitles = alltitles+zooqleobj.top5titles
             allurls = allurls+zooqleobj.top5urls
+            allseeders = allseeders+zooqleobj.top5seeders
         else:
             print("")
         title.pack()
-
-        print(alltitles)
-        print(allurls)
         titlelist = Text(searchedframe4)
+        if allseeders != []:
+            allseeders, allurls, alltitles = zip(*sorted(zip(allseeders, allurls, alltitles), reverse=True))
+            #sorts all 3 lists relative to each other based on the number of seeders
+        else:
+            print("Hoge")
+        print(alltitles)
+        #print(allurls)
+        print(allseeders)
+        j=0
+        tree = ttk.Treeview(searchedframe4, columns=3)
+        tree.heading("#0", text="Titles")
+        tree.column("#0",minwidth=0,width=100)
+        #tree.heading("A", text="")   
+        #tree.column("A",minwidth=0,width=200, stretch=NO) 
+        tree.heading("#1", text="Seeders")   
+        tree.column("#1",minwidth=0,width=20)
+
         for i in alltitles:
-            titlelist.insert(END, i + '\n')
-            # currenturl=allurls[i]
-            titlelist.bind("<Button-1>", lambda e: gui.callback(currenturl))
-        titlelist.pack(side=LEFT)
+            tree.insert("", "end", text="%s" % i)
+        tree.pack(expand=True)    
+        #for i in alltitles:
+        #    currenturl=allurls[j]
+        #    titlelist.insert(END, i + '\n')
+        #    #titlelist.bind("<Button-1>", lambda e: gui.callback(currenturl))
+        #    j=j+1
+        #titlelist.pack(side=LEFT)
         #    i=0
         #    titlelist=Label(searchedframe2, text=scraper.top5titles[i])
 
