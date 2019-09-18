@@ -106,7 +106,10 @@ class scraper:
         # literlly stole this from stack overflow
         x1337url = x1337url.replace('search+term', replacewith)
         # replaces the search+term in the url with the users chosen search term
-        response = requests.get(x1337url, headers=headers)
+        try:
+            response = requests.get(x1337url, headers=headers)
+        except ConnectionError:
+            print("Hoge")
         # .replace(
         #    'search+term', replacewith), headers=headers)
         # print(x1337url)
@@ -121,7 +124,6 @@ class scraper:
         # creates an object containing all of the tr rows as each of these includes all the information for one torrent
         # Print for testing purposes
         titles = soup.find_all(class_="coll-1 name")
-        comments = soup.find_all(class_="comments")
         seeders = soup.find_all(class_="coll-2 seeds")
         # grabs all of the elements with the clas of coll-1 name
         # print(titles)
@@ -131,13 +133,11 @@ class scraper:
             if titles != []:
                 currenttitle = titles[i]
                 # gets a title based on the value of i
+                currentcomment = str(currenttitle)
+                currentcomment = currentcomment.split('</i>')[2]
                 currenttitle = currenttitle.text
-                currentcomment = comments[i-1]
-                # grabs comments at i-1 as i is based on the coll-1 name classes which ignore the first one
-                currentcomment = str(currentcomment)
                 # converts to string
-                currentcomment = currentcomment.replace(
-                    '<span class="comments"><i class="flaticon-message"></i>', '')
+                currentcomment = str(currentcomment)
                 # removes everything before the number of comments
                 currentcomment = currentcomment.split('</span>', 1)[0]
                 currenttitle = currenttitle.replace(currentcomment, '')
@@ -151,7 +151,7 @@ class scraper:
                 # removes all of the irrelevant html info from before the url
                 currenturl = currenturl.split('">', 1)[0]
                 # removes irrelevant information from after the url
-                currenturl = "http://www.1337x.to"+currenturl
+                currenturl = "https://www.1337x.to"+currenturl
                 currentseeders = seeders[i-1]
                 currentseeders = str(currentseeders)
                 currentseeders = currentseeders.replace(
@@ -383,18 +383,16 @@ class gui:
         print(alltitles)
         #print(allurls)
         print(allseeders)
-        j=0
-        tree = ttk.Treeview(searchedframe4, columns=3)
+        tree = ttk.Treeview(searchedframe3, columns=3)
         tree.heading("#0", text="Titles")
-        tree.column("#0",minwidth=0,width=100)
-        #tree.heading("A", text="")   
-        #tree.column("A",minwidth=0,width=200, stretch=NO) 
+        tree.column("#0",minwidth=0,width=400) 
         tree.heading("#1", text="Seeders")   
-        tree.column("#1",minwidth=0,width=20)
-
+        tree.column("#1",minwidth=0,width=50)
+        j=0
         for i in alltitles:
-            tree.insert("", "end", text="%s" % i)
-        tree.pack(expand=True)    
+            tree.insert("", "end", text="%s" % i, values=allseeders[j])
+            j=j+1
+        tree.pack(expand=True)  
         #for i in alltitles:
         #    currenturl=allurls[j]
         #    titlelist.insert(END, i + '\n')
