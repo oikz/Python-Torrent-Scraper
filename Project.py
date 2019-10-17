@@ -33,9 +33,9 @@ class scraper:
         piratebayurl = piratebayurl.replace('search%20term', replacewith)
         # replaces the search%20term in the url with the users chosen search term
         try:
-            response = requests.get(piratebayurl)
-        except ConnectionError:
-            print("Nice")
+            response = requests.get(piratebayurl, verify=False)
+        except requests.exceptions.RequestException:
+            print("Piratebay Not working")
         # requests the html of the page
         html = response.text
         # saves the html as a big string
@@ -66,7 +66,8 @@ class scraper:
         # sets a base i value of 0 to be used next
         while (i <= 4):
             # repeats 5 times
-            if titles != []:
+            print(len(titles))
+            if titles != [] and len(titles)>i:
                 #if the titles list contains something
                 currenttitle = titles[i]
                 # saves the currently being used title as currenttitle for easier modification
@@ -122,7 +123,7 @@ class scraper:
         # literlly stole this from stack overflow
         x1337url = x1337url.replace('search+term', replacewith)
         # replaces the search+term in the url with the users chosen search term
-        response = requests.get(x1337url, headers=headers)
+        response = requests.get(x1337url, headers=headers, verify=False)
         # requests the html of the page
         html = response.text
         # saves the html as a big string
@@ -137,20 +138,25 @@ class scraper:
         i = 1
         # set at 1 instead of 0 as the first element with coll-1 name is not relevant for this program
         while (i <= 5):
-            if titles != []:
+            if titles != [] and len(titles) >i:
+                #second part is to stop the program from running this code and getting an error if there is less than the expected 5 responses
+                print(i)
+                print(len(titles))
                 #if the titles list contains values
                 currenttitle = titles[i]
                 # gets a title based on the value of i
                 currentcomment = str(currenttitle)
                 #saves currentcomment variable a string conversion of "currentitle"
-                currentcomment = currentcomment.split('</i>')[2]
-                #splits currentcomment into parts split by </i> and then chooses the 3rd value as the requested one
+                if currenttitle.find("comments")==-1:
+                    currentcomment = currentcomment.split('</i>')[2]
+                    #splits currentcomment into parts split by </i> and then chooses the 3rd value as the requested one
+                    currentcomment = str(currentcomment)
+                    # converts to string
+                    currentcomment = currentcomment.split('</span>', 1)[0]
+                    # removes everything before the number of comments
                 currenttitle = currenttitle.text
                 #grabs only the text portion of currentitle using BeautifulSoup4
-                currentcomment = str(currentcomment)
-                # converts to string
-                currentcomment = currentcomment.split('</span>', 1)[0]
-                # removes everything before the number of comments
+
                 currenttitle = currenttitle.replace(currentcomment, '')
                 # replaces the number at the end of the title (the number of comments) with a blank space
                 currenturl = titles[i]
@@ -187,6 +193,9 @@ class scraper:
                 print("No Results from 1337x")
                 break
 
+
+    #This scraper/website sometimes only works a couple of times before requests start getting redirected to a captcha
+    #style page that i have found no workaround to - browser verification page
     def rarbgscraper(self):
         global searchterm
         titles = []
@@ -198,8 +207,11 @@ class scraper:
         # replaces search+term with the users chosen term
         rarbgurl = rarbgurl+"&order=seeders&by=DESC"
         #adds part of the url to the end as this sorts the files by highest seeders first which is easier for the program
-        response = requests.get(rarbgurl)
+        try:
+            response = requests.get(rarbgurl, verify=False)
         # requests the html of the page
+        except requests.exceptions.RequestException:
+            print("Rarbg Not Working")
         html = response.text
         # saves the html as a big string
         soup = BeautifulSoup(html, "lxml")
@@ -211,7 +223,14 @@ class scraper:
         #sets i to 1 for the first value
         while (i <= 40):
             #repeat while i is equal to or less than 40
+            listnum=(i-1)/8
+            #a
+            #
+            #TO DO Fix single result breaking program
+            #
+            #
             if titles != []:
+                print(i)
                 #if the titles list contains values
                 currenttitle = titles[i+13]
                 #gets the currenttitle at i+13 as the structure of the website is strange 
@@ -255,7 +274,10 @@ class scraper:
         replacewith = searchbox.get()
         zooqleurl = zooqleurl.replace('Search+Term', replacewith)
         zooqleurl = zooqleurl+'&s=ns&v=t&sd=d'
-        response = requests.get(zooqleurl)
+        try:
+            response = requests.get(zooqleurl, verify=False)
+        except requests.exceptions.RequestException:
+            print("Zooqle not working")
         # requests the html of the page
         html = response.text
         # saves the html as a big string
@@ -268,7 +290,7 @@ class scraper:
             class_="progress-bar smaller prog-green prog-l")
         i = 0
         while (i <= 4):
-            if titles != []:
+            if titles != [] and len(titles)>i:
                 currenttitle = titles[i]
                 currenttitle = str(currenttitle)
                 currenttitle2 = currenttitle.split('">')[3]
@@ -303,7 +325,6 @@ class scraper:
                 print("No Results from Zooqle")
                 break
 
-
 class gui:
     def __init__(self, alltitles, allurls, allseeders, allsites):
         #defines class variables
@@ -311,10 +332,6 @@ class gui:
         self.allurls = allurls
         self.allseeders = allseeders
         self.allsites = allsites
-
-    def callback(url):
-        webbrowser.open_new(url)
-    #function that opens a web browser for a provided url
 
     def restart(self):
         menuframe1.pack_forget()
@@ -324,10 +341,16 @@ class gui:
         searchedframe2.pack_forget()
         searchedframe3.pack_forget()
         searchedframe4.pack_forget()
+        searchedframe5.pack_forget()
+        self.allseeders=[]
+        self.alltitles=[]
+        self.allsites=[]
+        self.allurls=[]
         tooshort = False
         # chosensite=False
         guiobject.mainmenu()
         #calls the mainmenu function of the variable guiobject
+        window.geometry('650x250')
 
     def searched(self):
         global chosensite
@@ -335,6 +358,7 @@ class gui:
         global searchedframe2
         global searchedframe3
         global searchedframe4
+        global searchedframe5
         global tooshort
         global title
         global piratebayobj
@@ -356,7 +380,11 @@ class gui:
         searchedframe3.pack()
         searchedframe4 = Frame(window)
         searchedframe4.pack()
-        #creates 4 frames to be used by the program for sorting/displaying the results page
+        searchedframe5 = Frame(window)
+        searchedframe5.pack()
+        #creates 5 frames to be used by the program for sorting/displaying the results page
+
+        window.geometry('650x420')
 
         if thepiratebay.get() == 1 or x1337.get() == 1 or rarbg.get() == 1 or zooqle.get() == 1:
             print("")
@@ -428,60 +456,59 @@ class gui:
             #creates a button for the user to make a new search from the search page that is presented above the results
         tryagainbutton.pack(side=RIGHT)
 
-        titlelist = Text(searchedframe4)
-        if allseeders != []:
-            allseeders, allurls, alltitles, allsites = zip(*sorted(zip(allseeders, allurls, alltitles, allsites), reverse=True))
-            #sorts all 3 lists relative to each other based on the number of seeders
+        if self.allseeders != []:
+            self.allseeders, self.allurls, self.alltitles, self.allsites = zip(*sorted(zip(self.allseeders, self.allurls, self.alltitles, self.allsites), reverse=True))
+            #sorts all 4 lists relative to each other based on the number of seeders
         else:
             print("")
-        print(alltitles)
-        #print(allurls)
-        print(allseeders)
-
+        
 
         def weblink(self):
-            i = titlelistbox.curselection()[0]
-            item = urlslistbox.get(i)
-            webbrowser.open_new(item)
+            if titlelistbox.curselection() != ():
+                #titlelistbox.curselection() returns the integer value of which part of the list is selected (0 = first line)
+                #if this element is not empty
+                i = titlelistbox.curselection()[0] 
+                #curselection() saves result as a list with the first value being the important one
+                #creates variable i with the first value of the titlelistbox.curselection() list        
+                item = urlslistbox.get(i)
+                #uses the integer supplied by the element clicked by the user to find the correct url from another listbox off screen
+                webbrowser.open_new(item)
+                #opens a new page with the supplied url
+        
+        title1=Label(searchedframe4,text="Filename", width=45)
+        title1.pack(side=LEFT)
+        title2=Label(searchedframe4,text="Seeders", width=10)
+        title2.pack(side=LEFT)
+        title3=Label(searchedframe4,text="Source Website")
+        title3.pack(side=LEFT)
+        titlelistbox = Listbox(searchedframe5, selectmode="SELECT", width=50, height=20)
+        #creates a number of titles to display above the table of results to notify the user what each column means
 
-        titlelistbox = Listbox(searchedframe4, selectmode="SELECT", width=50)
+        #creates a listbox using searchedframe4 as the frame, the mode of allowing the user to only select one item and the width at 50
         for i in self.alltitles:
             titlelistbox.insert(END, i)
+            #this loop inserts each title into the listbox list at the end of the list
         titlelistbox.pack(side=LEFT)
+        #packs the listbox to the left to allow the program to display 3 listboxes side-by-side 
 
-
-        seederlistbox = Listbox(searchedframe4, selectmode="SELECT", width=5)
+        seederlistbox = Listbox(searchedframe5, selectmode="SELECT", width=5, height=20)
         seederlistbox.pack(side=LEFT)
         for i in self.allseeders:
             seederlistbox.insert(END, i)
 
-        siteslistbox = Listbox(searchedframe4, selectmode="SELECT", width=20)
+        siteslistbox = Listbox(searchedframe5, selectmode="SELECT", width=20, height=20)
         siteslistbox.pack()
         for i in self.allsites:
             siteslistbox.insert(END, i)
 
-        urlslistbox = Listbox(searchedframe4, selectmode="SELECT", width=1)
+        urlslistbox = Listbox(searchedframe5, selectmode="SELECT", width=1, height=20)
         urlslistbox.pack(side=LEFT)
         for i in self.allurls:
             urlslistbox.insert(END, i)
+        
         titlelistbox.bind('<<ListboxSelect>>', weblink)
-        #tree = ttk.Treeview(searchedframe4, columns=('Titles', 'Seeders', 'Website'))
-        #tree.heading("#0", text="Titles")
-        #tree.column("#0",minwidth=0,width=480) 
-        #tree.heading("#1", text="Seeders")   
-        #tree.column("#1",minwidth=0,width=50)
-        #tree.heading("#2", text="Website")
-        #tree.column("#2", minwidth=0, width=120)
-        #j=0
-        #for i in self.alltitles:
-        #    tree.insert("", "end", text=i, values=[self.allseeders[j], self.allsites[j]])
-        #    #tree.bind("<Button-2>", gui.callback(allurls[j]))
-        #    def make_lambda(x):
-        #        return lambda e:gui.callback(x)
-        #    currenturl=self.allurls[j]
-        #    tree.bind("<Button-1>", make_lambda(currenturl))
-        #    j=j+1    
-        #tree.pack(expand=True)  
+        #causes changing the value of the current list number to call weblink()
+        #when the user clicks anything in the first listbox, weblink is called 
 
 
         # original output testing for checkboxes
@@ -505,6 +532,7 @@ class gui:
                 searchedframe2.pack_forget()
                 searchedframe3.pack_forget()
                 searchedframe4.pack_forget()
+                searchedframe5.pack_forget()
                 menuframe1.pack_forget()
                 menuframe2.pack_forget()
                 menuframe3.pack_forget()
@@ -529,12 +557,10 @@ class gui:
                 searchedframe2.pack_forget()
                 searchedframe3.pack_forget()
                 searchedframe4.pack_forget()
+                searchedframe5.pack_forget()
                 menuframe1.pack_forget()
                 menuframe2.pack_forget()
                 menuframe3.pack_forget()
-                # menuframe1.destroy()
-                # menuframe2.destroy()
-                # menuframe3.destroy()
                 guiobject.mainmenu()
                 # clears everything
             else:
