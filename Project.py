@@ -23,6 +23,7 @@ class scraper:
 
     def piratebayscraper(self):
         global searchterm
+        global retry
         #grabs searchterm from the outside code
         titles = []
         #creates an initial list for titles to be appended to
@@ -32,8 +33,10 @@ class scraper:
         #gets variable replacewith by calling searchbox.get() to get what the user searched for
         piratebayurl = piratebayurl.replace('search%20term', replacewith)
         # replaces the search%20term in the url with the users chosen search term
+        headers = requests.utils.default_headers()
+        headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
         try:
-            response = requests.get(piratebayurl, verify=False)
+            response = requests.get(piratebayurl, headers=headers)
         except requests.exceptions.RequestException:
             print("Piratebay Not working")
         # requests the html of the page
@@ -57,8 +60,11 @@ class scraper:
             print("")
             #Simply continues down the program to the next part
         else:
-            piratebayobj.piratebayscraper()
-            #break
+            if retry==0:
+                retry=1
+                piratebayobj.piratebayscraper()
+
+                
             #if the program can find the string, it retries once 
             #may continue going, need to test
             
@@ -123,7 +129,7 @@ class scraper:
         # literlly stole this from stack overflow
         x1337url = x1337url.replace('search+term', replacewith)
         # replaces the search+term in the url with the users chosen search term
-        response = requests.get(x1337url, headers=headers, verify=False)
+        response = requests.get(x1337url, headers=headers)
         # requests the html of the page
         html = response.text
         # saves the html as a big string
@@ -208,7 +214,7 @@ class scraper:
         rarbgurl = rarbgurl+"&order=seeders&by=DESC"
         #adds part of the url to the end as this sorts the files by highest seeders first which is easier for the program
         try:
-            response = requests.get(rarbgurl, verify=False)
+            response = requests.get(rarbgurl)
         # requests the html of the page
         except requests.exceptions.RequestException:
             print("Rarbg Not Working")
@@ -219,17 +225,22 @@ class scraper:
         soup.prettify()
         # converts the "soup" parse tree into a long string
         titles = soup.find_all(class_="lista")
+        listnum = soup.find_all(href=re.compile("/torrent/"))
+        print(len(listnum))
         i = 1
         #sets i to 1 for the first value
+        j = 0
         while (i <= 40):
             #repeat while i is equal to or less than 40
-            listnum=(i-1)/8
-            #a
             #
+            #20?
             #TO DO Fix single result breaking program
+            print(i)
+            #listnum=(len(titles)-17)/20
+            print(listnum)
+            print(len(titles))
             #
-            #
-            if titles != []:
+            if titles != [] and len(titles)>j:
                 print(i)
                 #if the titles list contains values
                 currenttitle = titles[i+13]
@@ -263,6 +274,7 @@ class scraper:
                 #appends "rarbg.to" to top5sites so the program can display where this file came from
                 i = i+8
                 #increases i by 8 for the next file
+                j=j+1
             else:
                 print("No Results from rarbg")
                 break
@@ -275,7 +287,7 @@ class scraper:
         zooqleurl = zooqleurl.replace('Search+Term', replacewith)
         zooqleurl = zooqleurl+'&s=ns&v=t&sd=d'
         try:
-            response = requests.get(zooqleurl, verify=False)
+            response = requests.get(zooqleurl)
         except requests.exceptions.RequestException:
             print("Zooqle not working")
         # requests the html of the page
@@ -310,7 +322,10 @@ class scraper:
                 currenturl = "https://zooqle.com"+currenturl
                 ##
                 currentseeders = seeders[i]
+                ##Breaks Here
                 currentseeders = currentseeders.text
+                currentseeders=currentseeders.split('|')[0]
+                print(currentseeders)
                 currentseeders = currentseeders.replace(' K', 'K')
                 # removes the gap before the K because i didnt like it
                 self.top5titles.append(currenttitle2)
@@ -362,6 +377,7 @@ class gui:
         global tooshort
         global title
         global piratebayobj
+        global retry
         #global Variables
         alltitles = []
         allurls = []
@@ -403,6 +419,7 @@ class gui:
             piratebaylabel.pack(side=LEFT)
             piratebayobj = scraper([], [], [], [])
             #creates an object called piratebayobj using scraper and supplying 4 empty lists
+            retry=0
             piratebayobj.piratebayscraper()
             #calls piratebayscraper() from inside the new object "piratebayobj"
             self.alltitles = self.alltitles+piratebayobj.top5titles
