@@ -282,6 +282,11 @@ class scraper:
 
     def zooqlescraper(self):
         global searchterm
+        top5titles=[]
+        top5urls=[]
+        top5seeders=[]
+        top5sites=[]
+        mutedlist=[]
         zooqleurl = "https://zooqle.com/search?q=Search+Term"
         replacewith = searchbox.get()
         zooqleurl = zooqleurl.replace('Search+Term', replacewith)
@@ -298,48 +303,67 @@ class scraper:
         soup.prettify()
         # converts the "soup" parse tree into a long string object thing
         titles = soup.find_all(class_="text-trunc text-nowrap")
-        seeders = soup.find_all(
-            class_="progress-bar smaller prog-green prog-l")
+        seeders = soup.find_all(class_="progress prog trans70")+soup.find_all(class_="progress prog trans90")
         i = 0
-        while (i <= 4):
-            if titles != [] and len(titles)>i:
-                currenttitle = titles[i]
+        j = 0
+        while (i <= 9):
+            if titles != [] and len(titles)>i:    
+                currenttitle = titles[i]             
                 currenttitle = str(currenttitle)
-                currenttitle2 = currenttitle.split('">')[3]
-                currenttitle2 = currenttitle2.split('</a>', 1)[0]
-                currenttitle2 = currenttitle2.replace('<hl>', '')
-                currenttitle2 = currenttitle2.replace('</hl>', '')
-                currenturl = titles[i]
-                ##
-                currenturl = str(currenturl)
-                if currenturl.find('<a class="small"')!=-1:
-                    currenturl = currenturl.split('<a class="small"', 1)[1]
+                if currenttitle.find('<a class="text-muted2 small"')==-1:                
+                    currenttitle2 = currenttitle.split('">')[3]
+                    currenttitle2 = currenttitle2.split('</a>', 1)[0]
+                    currenttitle2 = currenttitle2.replace('<hl>', '')
+                    currenttitle2 = currenttitle2.replace('</hl>', '')
+                    currenturl = titles[i]
+                    ##
+                    currenturl = str(currenturl)
+                    if currenturl.find('<a class="small"')!=-1:
+                        currenturl = currenturl.split('<a class="small"', 1)[1]
+                    else:
+                        currenturl = currenturl.split('<a class="text-muted2 small"', 1)[1]
+                    currenturl = currenturl.replace(' href="', '')
+                    currenturl = currenturl.split('">')[0]
+                    currenturl = currenturl.replace(' /', '')
+                    currenturl = "https://zooqle.com"+currenturl
+                    ##
+                    currentseeders = seeders[i]
+                    currentseeders=str(currentseeders)
+                    currentseeders=currentseeders.split('title="', 1)[1]
+                    currentseeders = currentseeders.split(' |', 1)[0]
+                    currentseeders=currentseeders.replace('Seeders: ', '')
+                    print(currentseeders)
+                    currentseeders = currentseeders.replace(' K', 'K')
+                    # removes the gap before the K because i didnt like it
+                    # print(currenttitle2)
+                    # print(currenturl)
+                    # print(currentseeders)
+                    top5titles.append(currenttitle2)
+                    top5urls.append(currenturl)
+                    top5seeders.append(int(currentseeders))
+                    top5sites.append("Zooqle.com")
                 else:
-                    currenturl = currenturl.split('<a class="text-muted2 small"', 1)[1]
-                currenturl = currenturl.replace(' href="', '')
-                currenturl = currenturl.split('">')[0]
-                currenturl = currenturl.replace(' /', '')
-                currenturl = "https://zooqle.com"+currenturl
-                ##
-                currentseeders = seeders[i]
-                ##Breaks Here
-                currentseeders = currentseeders.text
-                currentseeders=currentseeders.split('|')[0]
-                print(currentseeders)
-                currentseeders = currentseeders.replace(' K', 'K')
-                # removes the gap before the K because i didnt like it
-                self.top5titles.append(currenttitle2)
-                self.top5urls.append(currenturl)
-                self.top5seeders.append(int(currentseeders))
-                self.top5sites.append("Zooqle.com")
-                # print(currenttitle2)
-                # print(currenturl)
-                # print(currentseeders)
+                    #if the program finds '<a class="text-muted2 small"' in the program
+                    mutedlist.append(titles[i])
                 i = i+1
             else:
                 print("No Results from Zooqle")
                 break
-
+        print(top5titles)
+        print(mutedlist)
+        #remove muted titles
+        if top5seeders != []:
+            top5seeders, top5urls, top5titles, top5sites = zip(*sorted(zip(top5seeders, top5urls, top5titles, top5sites), reverse=True))
+            #sorts all 4 lists relative to each other based on the number of seeders 
+        while (j<=4):
+            if titles != [] and len(titles)>j:
+                self.top5titles.append(top5titles[j])
+                self.top5urls.append(top5urls[j])
+                self.top5seeders.append(top5seeders[j])
+                self.top5sites.append(top5sites[j])
+                j=j+1
+            else:
+                break
 class gui:
     def __init__(self, alltitles, allurls, allseeders, allsites):
         #defines class variables
