@@ -55,7 +55,7 @@ class scraper:
         del seeders[1::2]
         # deletes the leechers of each file as it wont be in the program
         # may be added at a later date
-        if html.find("The initial connection between Cloudflare's network and the origin web server timed out. As a result, the web page can not be displayed.") == -1:
+        if html.find("The initial connection between Cloudflare's network and the origin web server timed out. As a result, the web page can not be displayed.") == -1 or html.find("Database maintenance,")==-1:
             #If the program can find this string inside the html, it means the website is down 
             print("")
             #Simply continues down the program to the next part
@@ -169,8 +169,9 @@ class scraper:
                 # print(currenturl)
                 currenturl = str(currenturl)
                 # converts currenturl to a string
-                currenturl = currenturl.replace(
-                    '<td class="coll-1 name"><a class="icon" href="/sub/10/0/"><i class="flaticon-apps"></i></a><a href="', '')
+                #currenturl = currenturl.replace(
+                #    '<td class="coll-1 name"><a class="icon" href="/sub/10/0/"><i class="flaticon-apps"></i></a><a href="', '')
+                currenturl = currenturl.split('href="', 2)[2]
                 # removes all of the irrelevant html info from before the url
                 currenturl = currenturl.split('">', 1)[0]
                 # removes irrelevant information from after the url
@@ -307,10 +308,14 @@ class scraper:
         i = 0
         j = 0
         while (i <= 9):
+            #runs 10 times to account for any files/torrents that may be listed incorrectly on the website and need to be replaced
             if titles != [] and len(titles)>i:    
                 currenttitle = titles[i]             
                 currenttitle = str(currenttitle)
-                if currenttitle.find('<a class="text-muted2 small"')==-1:                
+                if currenttitle.find('<a class="text-muted2 small"')==-1:
+                    #this section only adds non-muted files to the list
+                    #on zooqle.com some files are listed with a class of "text-muted2" - unsure why this is but they seem to all
+                    #be files that have 1 seeder and 1 torrent so may either be fake or errors on the website database or something                
                     currenttitle2 = currenttitle.split('">')[3]
                     currenttitle2 = currenttitle2.split('</a>', 1)[0]
                     currenttitle2 = currenttitle2.replace('<hl>', '')
@@ -357,6 +362,7 @@ class scraper:
             #sorts all 4 lists relative to each other based on the number of seeders 
         while (j<=4):
             if titles != [] and len(titles)>j:
+                #appends 5 results from the zooqle list of files to the overall list
                 self.top5titles.append(top5titles[j])
                 self.top5urls.append(top5urls[j])
                 self.top5seeders.append(top5seeders[j])
