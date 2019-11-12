@@ -226,30 +226,23 @@ class scraper:
         soup.prettify()
         # converts the "soup" parse tree into a long string
         titles = soup.find_all(class_="lista")
-        listnum = soup.find_all(href=re.compile("/torrent/"))
-        print(len(listnum))
+        numberoffiles = soup.find_all(class_="lista2")
+        #looks for the number of files based on how many instances there are of lista2 (the class for each table row for each file)
         i = 1
         #sets i to 1 for the first value
         j = 0
         while (i <= 40):
             #repeat while i is equal to or less than 40
-            #
-            #20?
-            #TO DO Fix single result breaking program
-            print(i)
-            #listnum=(len(titles)-17)/20
-            print(listnum)
-            print(len(titles))
-            #
-            if titles != [] and len(titles)>j:
-                print(i)
+            if titles != [] and j < len(numberoffiles):
                 #if the titles list contains values
                 currenttitle = titles[i+13]
                 #gets the currenttitle at i+13 as the structure of the website is strange 
                 currenttitle = currenttitle.text
                 #gets only the text porion of the variable
-                currenttitle = currenttitle.split('title="')
+                currenttitle = str(currenttitle)
+                currenttitle = currenttitle.split('title="')[0]
                 #splits the variable between instances of "title="
+                print(type(currenttitle))
                 currenturl = titles[i+13]
                 #grabs current url at i+13 (the same as the title)
                 currenturl = str(currenturl)
